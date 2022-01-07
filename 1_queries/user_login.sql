@@ -3,7 +3,7 @@ SELECT id,
   email,
   password
 FROM users
-WHERE email = 't@g.com';
+WHERE email = 'eva@gmail.com';
 -- @Block
 INSERT INTO users (name, email, password)
 VALUES (
