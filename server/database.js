@@ -80,7 +80,7 @@ const getAllReservations = function(guestId, limit = 10) {
     .query(`SELECT *
     FROM reservations JOIN properties ON properties.id = reservations.property_id
     WHERE reservations.guest_id = $1
-    LIMIT $2;`, [guestId, limit])
+    LIMIT $2;`, [Number(guestId), limit])
     .then((result) => {
       console.log(result.rows);
       return result.rows;
@@ -107,7 +107,7 @@ const getAllProperties = (options, limit = 10) => {
   let queryString = `
   SELECT properties.*, avg(property_reviews.rating) as average_rating
   FROM properties
-  JOIN property_reviews ON properties.id = property_id
+  LEFT JOIN property_reviews ON properties.id = property_id
   `;
 
   if (options.owner_id) {
@@ -117,9 +117,9 @@ const getAllProperties = (options, limit = 10) => {
   if (options.city) {
     queryParams.push(`%${options.city}%`);
     if (queryParams.length > 1) {
-      queryString += `AND city LIKE $${queryParams.length} `;
+      queryString += `AND properties.city LIKE $${queryParams.length} `;
     } else {
-      queryString += `WHERE city LIKE $${queryParams.length} `;
+      queryString += `WHERE properties.city LIKE $${queryParams.length} `;
     }
   }
   if (options.minimum_price_per_night) {
@@ -168,6 +168,7 @@ exports.getAllProperties = getAllProperties;
    * @return {Promise<{}>} A promise to the property.
    */
 const addProperty = function(property) {
+  console.log(property);
   return pool
     .query(`INSERT INTO properties (
       owner_id,
@@ -183,24 +184,24 @@ const addProperty = function(property) {
       street,
       city,
       province,
-      post_code,
-      active
+      post_code
     )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) , [owner_id: int,
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
+      [property.owner_id,
       property.title,
-      property.description,
+      Number(property.description),
       property.thumbnail_photo_url,
       property.cover_photo_url,
-      property.cost_per_night,
+      Number(property.cost_per_night),
+      Number(property.parking_spaces),
+      Number(property.number_of_bathrooms),
+      Number(property.number_of_bedrooms),
+      property.country,
       property.street,
       property.city,
       property.province,
-      property.post_code,
-      property.country,
-      property.parking_spaces,
-      property.number_of_bathrooms,
-      property.number_of_bedrooms])
-  RETURNING *`)
+      property.post_code]
+    )
     .then((result) => {
       return result.rows[0];
     })
@@ -209,3 +210,20 @@ const addProperty = function(property) {
     });
 };
 exports.addProperty = addProperty;
+
+// id SERIAL PRIMARY KEY NOT NULL,
+//   owner_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+//   title VARCHAR(255) NOT NULL,
+//   description TEXT,
+//   thumbnail_photo_url VARCHAR(255) NOT NULL,
+//   cover_photo_url VARCHAR(255) NOT NULL,
+//   cost_per_night INTEGER NOT NULL DEFAULT 0,
+//   parking_spaces INTEGER NOT NULL DEFAULT 0,
+//   number_of_bathrooms INTEGER NOT NULL DEFAULT 0,
+//   number_of_bedrooms INTEGER NOT NULL DEFAULT 0,
+//   country VARCHAR(255) NOT NULL,
+//   street VARCHAR(255) NOT NULL,
+//   city VARCHAR(255) NOT NULL,
+//   province VARCHAR(255) NOT NULL,
+//   post_code VARCHAR(255) NOT NULL,
+//   active BOOLEAN NOT NULL DEFAULT TRUE
