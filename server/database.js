@@ -169,38 +169,50 @@ exports.getAllProperties = getAllProperties;
    */
 const addProperty = function(property) {
   console.log(property);
+  // return pool
+  //   .query(`INSERT INTO properties (
+  //     owner_id,
+  //     title,
+  //     description,
+  //     thumbnail_photo_url,
+  //     cover_photo_url,
+  //     cost_per_night,
+  //     parking_spaces,
+  //     number_of_bathrooms,
+  //     number_of_bedrooms,
+  //     country,
+  //     street,
+  //     city,
+  //     province,
+  //     post_code
+  //   )
+  //     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
+  //     [property.owner_id,
+  //     property.title,
+  //     Number(property.description),
+  //     property.thumbnail_photo_url,
+  //     property.cover_photo_url,
+  //     Number(property.cost_per_night),
+  //     Number(property.parking_spaces),
+  //     Number(property.number_of_bathrooms),
+  //     Number(property.number_of_bedrooms),
+  //     property.country,
+  //     property.street,
+  //     property.city,
+  //     property.province,
+  //     property.post_code]
+  //   )
+  //   .then((result) => {
+  //     return result.rows[0];
+  //   })
+  //   .catch((err) => {
+  //     console.log(err.message);
+  //   });
   return pool
     .query(`INSERT INTO properties (
-      owner_id,
-      title,
-      description,
-      thumbnail_photo_url,
-      cover_photo_url,
-      cost_per_night,
-      parking_spaces,
-      number_of_bathrooms,
-      number_of_bedrooms,
-      country,
-      street,
-      city,
-      province,
-      post_code
+      JSON.stringify(Object.keys(x)).slice(2, -2)
     )
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`,
-      [property.owner_id,
-      property.title,
-      Number(property.description),
-      property.thumbnail_photo_url,
-      property.cover_photo_url,
-      Number(property.cost_per_night),
-      Number(property.parking_spaces),
-      Number(property.number_of_bathrooms),
-      Number(property.number_of_bedrooms),
-      property.country,
-      property.street,
-      property.city,
-      property.province,
-      property.post_code]
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING *`, Object.values(properties)
     )
     .then((result) => {
       return result.rows[0];
